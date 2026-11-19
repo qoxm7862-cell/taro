@@ -1,311 +1,431 @@
 # 타로카드 서비스 — Design System Guide (DESIGN.md)
 
-> **"신비로운 식물학 양피지 수첩에 깃든 타로 (Botanical & Celestial Sketchbook dipped in Honey)"**  
-> 따뜻한 크림빛 종이 캔버스(`#fbf9f6`), 맑고 깊은 딥 인디고(`#234386`) 잉크의 서체와 천체·식물 세밀화 라인아트, 그리고 꿀빛 골드(`#ffc400`)와 번트 오렌지(`#ed7328`)의 유기적인 블롭(Blob) 형태가 어우러진 현대적 에디토리얼 모바일 타로 서비스입니다.
+> **신비로운 식물학 양피지 수첩에 깃든 타로**
+>
+> Botanical & Celestial Sketchbook dipped in Honey
+>
+> 크림빛 종이, 딥 인디고 잉크, 꿀빛 천체와 식물 라인아트로 만드는 가벼운 모바일 타로 경험.
+
+## 0. 기준과 적용 범위
+
+- **갱신일**: 2026-11-19.
+- **시각 기준**: [타로 디자인 팩 — Figma](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-2)의 현재 화면 실측값.
+- **제품 기준**: `TARO_01_PRD.md`, `TARO_02_기능명세서.md`, `TARO_03_유저플로우.md`, `TARO_04_와이어프레임.md`. 로그인 없음, 개인정보 비저장, 메이저 아르카나 22장·정방향 한 장, 해석 최대 3줄·90자 원칙은 변경하지 않는다.
+- **사용자 확인**: 현재 화면의 실측값을 기준으로 정리하며, 없는 상태·규칙은 기존 가이드를 유지한다.
+- **등록 현황**: 현재 Figma에는 화면 9개와 공유 이미지 1개가 있으며, 등록된 메인 컴포넌트·컴포넌트 세트·로컬 색/텍스트/효과 스타일·변수 컬렉션은 없다. 아래 컴포넌트 이름과 CSS 토큰은 화면에서 추출한 **구현용 명명 규칙**이지, 이미 배포된 Figma 라이브러리의 이름이나 키가 아니다.
+- **표기**: `[실측]`은 현재 화면에서 확인한 값, `[기존 유지]`는 화면에 없는 기존 규칙이다. 별도 표기가 없는 화면 크기·색·서체·간격 표는 실측 기준이다. 시안에 없는 동작을 구현 완료된 것으로 해석하지 않는다.
+
+### 주요 변경점
+
+| 항목 | 이전 가이드 | 현재 기준 |
+|---|---|---|
+| 모바일 기준 | 390~430px | **375 × 852px** 기준 시안; 확장 폭 상한 430px는 기존 유지 |
+| 한글 제목·본문·UI | Pretendard/Inter, 제목에 Bebas Neue 혼용 | **Noto Sans KR** Regular 400 / Bold 700 |
+| 영문 강조 | 여러 대체 서체 병렬 표기 | 카드 영문명 Bebas Neue, 감성 영문 Caveat, 브랜드 Inter |
+| 주제 배치 | '2열'과 `grid-cols-3` 설명 충돌 | **3열 × 2행**, 가로 8px / 세로 10px |
+| 버튼 | 일반 높이 위주 | 시작 54px / 뽑기 52px / 저장·공유 48px / 보조 40px |
+| 개인정보 안내 | 테두리 있음, 패딩 14px | **테두리 없음**, 샌드 바탕, 입력 화면 패딩 12px |
+| 결과 카드 | 문서 내 그림자·배경 설명 불일치 | 흰색 4:5 카드, 인디고 9% 그림자; 저장본 그림자 없음 |
+| 예외 상태 | 토스트·모달 간략 안내 | 입력 전·날짜 오류·저장/복사 토스트·저장/복사 바텀시트 명세 추가 |
 
 ---
 
-## 1. 개요 및 디자인 철학
+## 1. 디자인 원칙
 
-본 디자인 시스템은 **[Pa'lais Style Reference]**의 따뜻한 아티잔 핸드메이드 감성을 기반으로, **[타로카드 기획문서(TARO_01~04)]**의 핵심 목표와 사용자 흐름을 모바일 웹 환경에 최적화하여 재구성한 시스템입니다.
+1. **따뜻하고 친근한 신비로움**: 기존 Pa'lais 스타일 레퍼런스의 아티잔 감성을 이어 간다. 보라색·검은 벨벳의 무거운 오컬트 테마가 아닌, 크림색 수첩과 식물도감의 인상을 유지한다.
+2. **가입 없이 약 1분**: 시작 → 정보·주제 입력 → 카드 한 장의 결과. 저장·공유는 결과 확인 후 선택하는 부가 행동이다.
+3. **인디고로 구조, 따뜻한 색으로 강조**: 텍스트·주요 CTA·선택 상태는 딥 인디고. 골드·오렌지·민트는 삽화·워시·보조선에 사용하고 주요 버튼 전체를 채우지 않는다.
+4. **개인정보 투명성**: 이름·생년월일·전공은 화면 메모리에서만 사용한다. 서버 전송, localStorage, 쿠키, 분석 도구 전송과 결과 이력을 만들지 않는다. 새로 고침·창 닫기·[처음으로] 시 삭제한다.
+5. **짧고 열려 있는 해석**: 카드 × 주제 + 별자리 + 전공 계열(입력·분류 가능 시)의 최대 3줄·90자. 건강·재물에 단정적인 예언을 하지 않으며 오락용 안내를 유지한다.
 
-### 핵심 디자인 원칙
-1. **따뜻하고 친근한 신비로움 (Warm & Cozy Mysticism)**: 차갑고 어두운 오컬트 분위기 대신, 유럽의 오래된 레시피 수첩이나 식물도감을 펼친 듯한 편안하고 따뜻한 크림 페이퍼 바탕에 별과 식물 라인아트를 더해 감성적인 신비감을 전달합니다.
-2. **모바일 1분 경험 & 높은 가독성 (1-Minute Mobile Flow)**: 390~430px 모바일 화면에 맞춰 불필요한 시각 요소를 덜어내고, 3줄(90자) 이내의 맞춤 해석과 액션 버튼(32px 필 버튼)이 한눈에 들어오도록 설계합니다.
-3. **신뢰와 투명성 (Zero-Data Privacy)**: 입력한 개인정보는 브라우저 메모리 안에서만 사용되고 즉시 소멸한다는 원칙을 부드러운 인디고/샌드 톤의 잠금 아이콘과 정갈한 텍스트로 안심시킵니다.
-4. **인스타 스토리 최적화 카드 (1080×1350 Shareable Canvas)**: S-03 결과 화면의 타로 카드는 세로 4:5(1080×1350) 비율로 설계되어, 캡처하거나 [이미지 저장] 시 왜곡 없이 감성적인 결과물로 저장됩니다.
+## 2. 색상과 효과
 
----
+### 2.1 화면에서 사용하는 색
 
-## 2. 디자인 토큰 — 색상 (Colors)
+| 구현 토큰 | 값 | 역할 |
+|---|---|---|
+| `deep-indigo` / `primary` | `#234386` | 제목·주요 CTA·선택 주제·아이콘·토스트 |
+| `cream-paper` / `background` | `#fbf9f6` | 페이지·바텀시트 바탕 |
+| `pure-white` / `card` | `#ffffff` | 입력 필드·결과 카드·미선택 주제·공유 메시지 박스 |
+| `ink-black` / `foreground` | `#1a1a1a` | 본문·입력값·미선택 주제 텍스트 |
+| `muted-foreground` | `#666666` | 부제·보조 설명·오락용 안내 |
+| `placeholder` | `#777777` | 입력 전 플레이스홀더 |
+| `warm-sand` / `border` / `input` | `#d2b68c` | 입력창·미선택 주제·보조 버튼 테두리 |
+| `privacy-surface` | `#f3eee5` | 개인정보 안내·별자리 배지 |
+| `secondary` | `#f0ebe1` | 다시 뽑기 버튼 바탕 |
+| `honey-gold` | `#ffc400` | 태양·별빛·시작 화면 워시 |
+| `burnt-orange` | `#ed7328` | 결과 공유 테두리·텍스트, 삽화 포인트 |
+| `mint-sage` | `#a2d3a6` | 시작 화면 워시·식물 삽화 포인트 |
+| `destructive` | `#d9383a` | 잘못된 날짜 필드 테두리 |
+| `error-text` | `#bd3031` | 날짜 오류 설명 |
+| `overlay` | `rgba(24,38,74,0.32)` | 바텀시트 뒤 화면 딤 |
 
-시스템은 **딥 인디고(`#234386`)**를 유일한 쿨톤이자 브랜드의 구조적 닻(Anchor)으로 사용합니다. 타이포그래피, 주요 버튼, 테두리, 라인아트의 기본색은 딥 인디고가 담당하며, 그 외의 에너지는 따뜻한 꿀빛 골드, 오렌지, 민트 세이지가 유기적인 블롭 형태로 전달합니다.
+시작 화면의 골드·민트 워시 도형 불투명도는 각각 **48%**다. 색상 자체를 연한 HEX로 바꾸지 않는다. 일러스트 내부의 세부 색은 원본 벡터를 기준으로 하며, 모든 경로의 색을 UI 토큰으로 승격하지 않는다.
 
-| 토큰명 | HEX / OKLCH | Tailwind 클래스 | 역할 및 가이드 |
+### 2.2 그림자·선·모서리
+
+| 대상 | 기준 |
+|---|---|
+| 시작 카드 뒷면 그림자 | `-6px 12px 22px rgba(35,67,134,0.16)` |
+| 결과 카드 그림자 | `-8px 12px 32px rgba(35,67,134,0.09)` |
+| 결과 카드 테두리 | 1px, `rgba(35,67,134,0.13)` |
+| 일반 입력·주제·보조 버튼 테두리 | 1px, Warm Sand |
+| 결과 공유 / 날짜 오류 테두리 | 1.5px, 각각 Burnt Orange / Destructive |
+| 버튼 / 주제 / 배지 반경 | 32px / 20px / 16px |
+| 입력 / 결과 카드·개인정보·토스트 반경 | 8px / 12px |
+| 바텀시트 반경 | 위쪽 두 모서리 24px, 아래쪽 0 |
+
+### 2.3 화면에 없는 색·효과 — 기존 유지
+
+`sky-blue: #6aa8dc`, `muted: #e8e2d5`, `soft-shadow: rgba(0,0,0,0.08)`, `shadow-blob: 0 16px 32px rgba(255,196,0,0.15)`는 기존 확장용 정의를 유지한다. 현재 주요 화면에 쓰인 것으로 간주하지 않으며 결과 카드의 실측 그림자를 대체하지 않는다.
+
+호버용 `#1b356d`(주요 버튼), `#e4dcce`(보조 버튼), 오렌지 10% 워시, 인디고 5% 워시도 `[기존 유지]`다. 포커스 링은 딥 인디고이며 오렌지보다 우선한다.
+
+## 3. 타이포그래피
+
+### 3.1 서체 역할
+
+- **Noto Sans KR Regular 400 / Bold 700**: 한글 제목, 본문, 폼, 버튼, 안내. 한글 제목에 Bebas Neue를 지정하지 않는다.
+- **Bebas Neue Regular 400**: `XIX THE SUN`처럼 영문·로마 숫자로 된 카드 명칭.
+- **Caveat Regular 400**: `The stars whisper to you`, `A little light for your day` 감성 영문.
+- **Inter Medium 500**: `TARO` 브랜드, 영문 브랜드 레이블, 일부 장식 문자.
+- `[기존 유지]` Noto Sans KR 사용이 불가능한 환경의 대체 순서는 Pretendard → Inter → system-ui. 기존 영문 대체안 Oswald, hwt-artz, Delivery Note와 스크립트 대체안 Nanum Pen Script, Dancing Script, 레이블 대체안 ITC Avant Garde Std는 예비안으로만 남긴다. 대체 적용 시 줄바꿈과 한글 글리프를 확인한다.
+
+### 3.2 실측 타입 스케일
+
+자간은 별도 기재가 없으면 **0**이다. 150% 행간은 Figma에서 픽셀 반올림되어 표시될 수 있다.
+
+| 역할 / 구현 토큰 | 서체·굵기 | 크기 / 행간 | 자간 |
 |---|---|---|---|
-| **Deep Indigo** | `#234386` | `bg-deep-indigo`, `text-deep-indigo` | **Primary Brand**: 헤드라인, 링크, 활성화된 주요 CTA 버튼(필), 라인아트 획, 선택된 토픽 칩. 전체 시스템의 구조적 신뢰감을 부여하는 핵심 컬러 |
-| **Honey Gold** | `#ffc400` | `bg-honey-gold`, `text-honey-gold` | **Celestial Accent**: 타로 카드의 별빛, 태양, 배경 유기적 블롭, 강조 뱃지. 면 채움 버튼으로는 쓰지 않고 그래픽 포인트로만 활용 |
-| **Burnt Orange** | `#ed7328` | `border-burnt-orange`, `text-burnt-orange` | **Secondary Accent**: 아웃라인 2차 버튼 테두리, 알림 배지, 하이라이트 문구, 인터랙티브 포커스 |
-| **Sky Blue** | `#6aa8dc` | `text-sky-blue`, `bg-sky-blue` | **Illustration Wash**: 별자리 기호, 보조 천체 라인아트, 신비로운 안개형 블롭 |
-| **Warm Sand** | `#d2b68c` | `bg-warm-sand`, `border-warm-sand` | **Paper Neutral**: 캔버스와 카드 사이를 이어주는 부드러운 디바이더, 인풋 테두리, 보조 칩 배경 |
-| **Mint Sage** | `#a2d3a6` | `bg-mint-sage` | **Botanical Accent**: 힐링, 건강 주제 칩 포인트, 식물 모티브 블롭 워시 |
-| **Ink Black** | `#1a1a1a` | `text-ink-black` | **Body Text**: 본문 해석 텍스트, 얇은 구분선(1px), 폼 입력 필드 텍스트 |
-| **Pure White** | `#ffffff` | `bg-pure-white` | **Card Surface**: 타로 결과 카드 표면, 인풋 박스 배경, 버튼 내부 텍스트 |
-| **Cream Paper** | `#fbf9f6` | `bg-cream-paper` | **Page Canvas**: 전체 모바일 웹 배경. 화면이 아닌 실제 고급 종이 수첩을 보는 듯한 아날로그 질감 형성 |
-| **Soft Shadow** | `rgba(0,0,0,0.08)` | `shadow-soft` | **Card Elevation**: 카드 모서리를 띄우는 비대칭 자연광 그림자 |
+| 시작 제목 `hero` | Noto Sans KR 700 | 40px / 150% | 0 |
+| 입력 제목·카드 한글명 `title` | Noto Sans KR 700 | 23px / 150% | 0 |
+| 결과 화면 제목 `result-heading` | Noto Sans KR 700 | 22px / 150% | 0 |
+| 바텀시트 제목 `sheet-heading` | Noto Sans KR 700 | 20px / 160% | 0 |
+| 주제 섹션 제목 `subheading` | Noto Sans KR 700 | 18px / 150% | 0 |
+| 카드 영문명 `card-en` | Bebas Neue 400 | 18px / 150% | 1.4px |
+| 브랜드 `brand` | Inter 500 | 17px / 150% | 0 |
+| 시작 본문·입력값 `input` | Noto Sans KR 400 | 16px / 150% | 0 |
+| 해석 `reading` | Noto Sans KR 400 | 15px / 24px | -0.2px |
+| 시작·뽑기 버튼 `cta` | Noto Sans KR 700 | 15px / 150% | 0 |
+| 시트 복귀 버튼 `sheet-button` | Noto Sans KR 700 | 14px / 160% | 0 |
+| 필드 레이블 | Noto Sans KR 700 | 13px / 150% | 0 |
+| 주제·결과 주요 액션·일반 설명 | Noto Sans KR 400 | 13px / 150% | 0 |
+| 바텀시트 설명 | Noto Sans KR 400 | 13px / 160% | 0 |
+| 직접 복사할 메시지 | Noto Sans KR 400 | 13px / 23px | 0 |
+| 내비게이션·결과 개인화 제목·보조 액션 | Noto Sans KR 400 | 12px / 150% | 0 |
+| 개인정보 안내 `privacy` | Noto Sans KR 400 | 11px / 18px | 0 |
+| 단계·힌트·별자리·보조 고지 | Noto Sans KR 400 | 11px / 150% | 0 |
+| 결과 오락용 안내·워터마크·글자 수 | Noto Sans KR 400 | 10px / 150% | 0 |
+| 브랜드 영문 레이블 | Inter 500 | 9px / 150% | 1.5px |
+| 시작 감성 영문 `script-hero` | Caveat 400 | 25px / 150% | 0 |
+| 결과 감성 영문 `script-result` | Caveat 400 | 23px / 150% | 0 |
 
----
+시트 하단 보조 고지는 11px / 160%다. 장식용 별 문자는 Inter 25px·32px 등이며 본문 타입 스케일에 포함하지 않는다. 이전 가이드의 UI 전체 넓은 자간 0.12~0.25em, 제목 105% 행간은 현재 화면의 기본 규칙이 아니다.
 
-## 3. 디자인 토큰 — 타이포그래피 (Typography)
+9~11px는 현재 시안의 보조 정보 실측값이지 접근성 충족을 보증하는 최소 크기가 아니다. 확대·대체 서체·작은 화면에서 읽기 어려우면 콘텐츠를 자르거나 본문·입력 글자를 줄이지 말고 스크롤과 재배치를 우선 검토한다. 입력값 16px 이상 원칙은 유지한다.
 
-타이포그래피는 **강렬한 압축형 헤드라인**, **친근하고 시적인 스크립트 서체**, **정갈한 현대적 본문 고딕(Pretendard/Inter)**, 그리고 **넓은 자간(0.13~0.25em)의 레이블** 4가지 목소리로 나뉩니다.
+## 4. 레이아웃과 간격
 
-### 서체 구성
-- **Display Heading**: `Bebas Neue`, `Oswald` (대체: `hwt-artz`, `Delivery Note`)
-  - 용도: "오늘의 타로", 카드 명칭("XIX THE SUN", "태양"), 섹션 대제목
-  - 특징: 굵고 압축된 대문자 영문/숫자, 타이트한 행간(0.9~1.1)
-- **Script Accent**: `Caveat`, `Nanum Pen Script` (대체: `Dancing Script`)
-  - 용도: 감성 문구, "The stars whisper to you", "나만을 위한 별의 조언"
-  - 특징: 손글씨 뉘앙스, 약간의 기울기
-- **Body & UI**: `Pretendard`, `Inter`, `system-ui`
-  - 용도: 맞춤 해석 3줄(90자 이내), 폼 라벨, 폼 인풋 텍스트, 개인정보 안내문
-  - 특징: 14~16px, 높은 가독성의 1.6 행간
-- **Eyebrow & Label**: `ITC Avant Garde Std`, `Pretendard`
-  - 용도: 별자리 표시("♌ 사자자리"), 토픽 뱃지, 버튼 텍스트
-  - 특징: 대문자, 극단적으로 넓은 자간 (`tracking-[0.15em]~[0.25em]`)
+### 4.1 모바일 기준
 
-### Type Scale (모바일 최적화)
+- 기준 화면: **375 × 852px**. 좌우 여백 각각 **24px**, 기본 콘텐츠 폭 **327px**.
+- 화면 상하 기본 여백은 24px, 상단 내비게이션/브랜드 영역 높이는 44px.
+- 실제 모바일 웹에서는 852px를 고정 높이로 강제하거나 넘친 내용을 숨기지 않는다. 콘텐츠와 키보드·브라우저 높이에 따라 세로 스크롤을 허용한다.
+- `[기존 유지]` 페이지는 중앙 정렬, 최대 폭 430px, 최소 높이 뷰포트 높이. 375px 외 별도 시안이나 브레이크포인트는 없다. 넓은 화면에서도 모바일 구성을 늘리며 새 데스크톱 레이아웃을 추정하지 않는다.
+- 안전 영역 대응은 구현 시 별도로 확인한다. 시안 상하 24px를 운영체제 상태바·홈 인디케이터 크기로 해석하지 않는다.
 
-| 토큰 | 크기 | 행간 | 자간 | 적용 위치 (Wireframe 매핑) |
+### 4.2 의미별 실측 간격
+
+| 위치 | 간격 / 패딩 |
+|---|---|
+| 시작 제목 ↔ 감성 문구 | 5px |
+| 시작 액션 영역 내부 | 18px |
+| 입력 제목 ↔ 부제 | 7px |
+| 입력 그룹 사이 | 16px |
+| 레이블 ↔ 필드 / 레이블 ↔ 힌트 | 6px / 6px |
+| 필드 내부 | 좌우 14px, 내용 ↔ 아이콘 8px |
+| 주제 섹션 | 위 22px / 아래 20px, 제목·행 사이 10px |
+| 주제 칩 | 열 간격 8px, 행 간격 10px, 아이콘 ↔ 글자 6px |
+| 결과 제목 ↔ 감성 문구 | 4px |
+| 결과 카드 내부 | 위·좌우 16px / 아래 14px, 항목 사이 7px |
+| 결과 액션 영역 | 위 20px, 내부 세로 10px, 버튼 열 사이 9px |
+| 개인정보 안내 — 입력 | 사방 12px, 아이콘 ↔ 글자 9px |
+| 개인정보 안내 — 결과 | 상하 10px / 좌우 12px, 아이콘 ↔ 글자 8px |
+| 토스트 | 상하 15px / 좌우 17px, 아이콘 ↔ 글자 10px |
+| 바텀시트 | 위 12px / 좌우 24px / 아래 28px, 항목 사이 14px |
+| 수동 복사 메시지 박스 | 사방 16px |
+
+이는 등록된 spacing 변수 스케일이 아니라 **역할별 측정값**이다. 7px·9px·17px처럼 화면에 존재하는 값을 임의로 4px 배수로 치환하지 않는다. 축소 미리보기와 1080px 출력물의 비례 확대값을 별도의 간격 토큰으로 만들지 않는다.
+
+## 5. 컴포넌트 명세
+
+아래 명칭은 shadcn/ui·Tailwind 기반 구현에서 사용할 역할명이다. 기존 `default`, `outline`, `secondary`, `ghost`, `topic` 변형 구분을 유지하되 실측값으로 맞춘다.
+
+### 5.1 Button
+
+| 용도 | 변형 | 폭 / 높이 | 글자 | 바탕·선 |
 |---|---|---|---|---|
-| `--text-hero` | 40px | 1.05 | 1.2px | S-01 "🔮 오늘의 타로" 메인 타이틀 |
-| `--text-card-title` | 24px | 1.15 | 0.8px | S-03 "XIX 태양", 카드 한글/영문 이름 |
-| `--text-subheading` | 18px | 1.3 | 0.4px | S-02 "나에 대해 알려 주세요", "어떤 주제가 궁금한가요?" |
-| `--text-script` | 20px | 1.2 | 0 | 감성 카피 및 부제 (Caveat) |
-| `--text-body` | 15px | 1.6 | -0.2px | S-03 맞춤 해석 3줄 (최대 90자 문장) |
-| `--text-caption` | 12px | 1.5 | 0.5px | 오락용 안내, 개인정보 미저장 안내문 |
-| `--text-button` | 14px | 1.0 | 0.12em | CTA 버튼 ("타로 시작", "카드 한 장 뽑기", "이미지 저장") |
-| `--text-badge` | 11px | 1.0 | 0.2em | 별자리 뱃지, 상단 카테고리 태그 |
+| 타로 시작 | `default` | 콘텐츠 전체 / 54px | 15px Bold | 인디고 / 선 없음 |
+| 카드 한 장 뽑기 | `default` | 콘텐츠 전체 / 52px | 15px Bold | 인디고 / 선 없음 |
+| 이미지 저장 | `default` | 결과 첫 행의 한 열 / 48px | 13px Regular | 인디고 / 선 없음 |
+| 결과 공유 | `outline` | 결과 첫 행의 한 열 / 48px | 13px Regular | 투명 / 오렌지 1.5px |
+| 다시 뽑기 | `secondary` | 결과 둘째 행의 한 열 / 40px | 12px Regular | `#f0ebe1` / 샌드 1px |
+| 처음으로 | `ghost` | 결과 둘째 행의 한 열 / 40px | 12px Regular | 투명 / 선 없음 |
+| 결과로 돌아가기 | `default` | 시트 콘텐츠 전체 / 48px | 14px Bold | 인디고 / 선 없음 |
 
----
+모두 반경 32px. 인디고 바탕의 글자·아이콘은 흰색, outline은 오렌지, secondary/ghost는 인디고다. 결과 버튼의 아이콘은 18px, 글자와 7px 간격. 시작 버튼의 화살표와 문구 간격은 12px, 뽑기 버튼의 별과 문구 간격은 8px다.
 
-## 4. 컴포넌트 규칙 (shadcn/ui & Tailwind v4)
+- **비활성 `[실측]`**: 버튼 전체 opacity 40%. 이름·유효한 생년월일·주제가 충족되지 않거나 날짜 오류가 있으면 뽑기 비활성.
+- **호버·누름 `[기존 유지]`**: 주요 버튼 `#1b356d`, secondary `#e4dcce`, outline 오렌지 10%, ghost 인디고 5%. 전환 200ms, 누를 때 scale 0.95, 비활성 입력 차단.
+- **일반 확장 크기 `[기존 유지]`**: 기존 `sm` 36px, `default` 48px, `lg` 56px, 아이콘 버튼 40px는 아직 배치되지 않은 용도에만 사용한다. 화면별 54px·52px·48px·40px를 덮어쓰지 않는다.
 
-### 4.1 버튼 (Button) — `shadcn buttonVariants`
+### 5.2 InputField
 
-버튼은 **32px 필(Pill) 형태**를 표준으로 사용하며, 카드의 소프트 사각 모서리(8px)와 대비를 이룹니다.
+- 327 × 48px 기준, 흰색, 반경 8px, 샌드 1px 선, 좌우 패딩 14px.
+- 레이블 13px Bold, 힌트 11px, 입력/플레이스홀더 16px, 글자 수 10px.
+- 이름: 닉네임 허용, 최대 10자, 빈 값 안내 `닉네임을 입력해 주세요`; `지민`은 예시 입력값이지 플레이스홀더가 아니다.
+- 생년월일: 빈 값 `YYYY . MM . DD`, 값 예시 `2004 . 08 . 03`. 별자리 계산에만 사용. 달력 아이콘 20px.
+- 전공: 선택, 빈 값 `예: 경영학과`. 인문·사회·경영·자연·공학·예체능으로 분류하고 미입력/분류 불가이면 전공 해석 줄을 생략한다.
+- 오류: 날짜 선 `#d9383a` 1.5px, 아래 `날짜를 다시 확인해 주세요`를 12px·`#bd3031`로 표시. 색만으로 오류를 전달하지 않는다.
+- 포커스 `[기존 유지]`: 2px 딥 인디고 링, 투명 테두리. 실제 날짜 검증과 날짜 피커 지원을 유지한다. `2004 . 02 . 30`은 오류 상태 예시이며 유효값이 아니다.
 
-```tsx
-// buttonVariants 설정 가이드
-const buttonVariants = cva(
-  "inline-flex items-center justify-center font-medium transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none rounded-[32px]",
-  {
-    variants: {
-      variant: {
-        // [F-1, F-3] 주요 CTA: 타로 시작, 카드 한 장 뽑기
-        default: "bg-[#234386] text-white hover:bg-[#1b356d] shadow-sm px-8 py-4 text-[15px] tracking-[0.08em] font-semibold",
-        // [F-5, F-6] 2차 액션: 결과 공유, 이미지 저장
-        outline: "border-2 border-[#ed7328] text-[#ed7328] hover:bg-[#ed7328]/10 bg-transparent px-6 py-3.5 text-[14px] tracking-[0.05em]",
-        // [F-7] 보조 액션: 다시 뽑기, 처음으로
-        secondary: "bg-[#f0ebe1] text-[#234386] hover:bg-[#e4dcce] border border-[#d2b68c]/60 px-5 py-3 text-[13px]",
-        // 토픽 선택 칩 버튼 (S-02 6개 주제)
-        topic: "border border-[#d2b68c] bg-white text-[#1a1a1a] data-[state=checked]:bg-[#234386] data-[state=checked]:text-white data-[state=checked]:border-[#234386] rounded-[20px] py-2.5 px-4 text-[14px]",
-        ghost: "hover:bg-[#234386]/5 text-[#234386] underline-offset-4 hover:underline text-[13px]",
-      },
-      size: {
-        default: "h-12 px-6",
-        sm: "h-9 px-4 text-xs",
-        lg: "h-14 px-8 text-base",
-        icon: "h-10 w-10 rounded-full",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
-```
+### 5.3 TopicChip
 
-### 4.2 타로 결과 카드 (Tarot Result Card) & 뒤집기 효과 (F-3, F-4)
+- 3열 × 2행: 커리어·재물·연애 / 건강·학업·종합. 한 번에 하나 선택.
+- 폭 `(콘텐츠 폭 - 16px) / 3`, 375px 화면에서 약 103.67px. 높이 39px, 반경 20px.
+- 미선택: 흰색·샌드 1px 선·Ink Black 글자·인디고 아이콘.
+- 선택: 인디고 바탕·선, 흰색 글자·아이콘. 글자 13px, 아이콘 15px, 사이 6px.
+- 주제 아이콘은 서류가방·지갑·하트·잎·책·별의 라인 벡터다. 이전 문서의 이모지 표기를 그대로 UI 자산으로 사용하지 않는다.
 
-- **형태 및 재질**: Pure White(`#ffffff`) 서피스, `rounded-[12px]`, 미세한 헤어라인 테두리(`border border-[#234386]/10`) 및 부드러운 비대칭 음영(`box-shadow: -8px 12px 32px rgba(35,67,134,0.08)`).
-- **이미지 규격 (F-5)**: 가로 세로 4:5 비율 (인스타그램 스토리 및 피드 최적 규격인 1080×1350 기준).
-- **뒤집기 효과 (F-3)**: 1초 이내(0.8초)의 부드러운 3D 플립 애니메이션 (`perspective: 1000px`, `rotateY(180deg)`).
+### 5.4 PrivacyCallout
+
+`#f3eee5` 바탕, 반경 12px, **테두리 없음**. 입력 화면은 패딩 12px·아이콘 20px, 결과는 상하 10px/좌우 12px·아이콘 18px. 글자는 인디고 11px / 18px.
+
+> 입력한 이름 · 생년월일 · 전공은 해석을 만드는 데만 쓰고, 서버로 보내거나 저장하지 않아요. 창을 닫거나 [처음으로]를 누르면 바로 지워져요.
+
+### 5.5 TarotResultCard
+
+- 화면 크기 **327 × 408.75px**, **4:5**. 흰색, 반경 12px, 인디고 13%의 1px 선, 9% 인디고 그림자.
+- 내부는 위에서부터 개인화 제목 → 삽화 → 영문명 → 한글명·별자리 → 해석 → 오락용 고지·서비스명.
+- 개인화 제목 `지민님의 타로 · 커리어`: 12px. 태양 삽화 영역: **145 × 154px**.
+- 영문명 `XIX THE SUN`: Bebas Neue 18px, 자간 1.4px. 한글명 `태양`: Noto Sans KR Bold 23px.
+- 별자리 배지: 11px, `#f3eee5`, 반경 16px, 상하 4px/좌우 9px.
+- 해석: 15px / 24px, 자간 -0.2px, 가운데 정렬, 최대 3줄·90자. 세 줄을 서로 다른 길이의 장문 문단으로 늘리지 않는다.
+- 하단 오락용 안내와 `오늘의 타로 · tarot.app`: 10px, 각각 Muted / Indigo.
+- 생년월일과 전공 **원문은 카드에 넣지 않는다**. 전공 계열로 만든 해석 문장은 포함할 수 있다.
+
+### 5.6 Toast
+
+- 폭 327px, 인디고 바탕, 반경 12px, 흰색 완료 아이콘 19px·글자 13px.
+- 패딩 상하 15px/좌우 17px, 간격 10px. 한 줄 저장 안내 높이 50px, 두 줄 복사 안내 70px는 콘텐츠에 따른 결과값이다.
+- 저장 완료: `이미지를 저장했어요`.
+- 자동 복사 완료: `결과를 복사했어요. 원하는 앱에 붙여 넣어 주세요`.
+- `[기존 유지]` 3초 후 페이드아웃. 시안은 정지 상태이며 타이머 구현을 증명하지 않는다. 실측 y=675px는 852px 높이의 예시 위치일 뿐 모든 기기의 고정 좌표가 아니다.
+
+### 5.7 FallbackBottomSheet
+
+- 전체 화면 딤 `rgba(24,38,74,0.32)`. 시트는 화면 하단, 크림 바탕, 위 모서리 24px.
+- 패딩 위 12px/좌우 24px/아래 28px, 항목 간격 14px. 핸들 36 × 4px, 제목 20px Bold, 닫기 아이콘 22px.
+- 저장 대체: 제목 `나만의 카드를 간직해요`, 안내 `이 브라우저에서는 바로 저장하기가 어려워요. 이미지를 길게 눌러 저장해 주세요.`, **271 × 338.75px**의 4:5 이미지 미리보기, 닉네임·별자리 포함 고지, [결과로 돌아가기].
+- 복사 대체: 제목 `직접 복사해서 공유해요`, 안내 `자동 복사를 지원하지 않는 브라우저예요. 아래 글을 길게 눌러 복사해 주세요.`, 직접 선택할 메시지, 개인정보 없는 링크 안내, [결과로 돌아가기].
+- 메시지 박스: 흰색·샌드 1px 선·반경 12px·패딩 16px, 글자 13px / 23px.
+- 저장 시트 592.75px, 복사 시트 495px는 예시 콘텐츠의 실측 높이. 고정 높이로 강제하지 말고 짧은 기기에서 내부 스크롤을 허용한다. 저장 대체 미리보기는 최종 PNG를 보여 주며 사용자 정보 입력 화면 전체를 캡처하지 않는다.
+
+## 6. 화면과 상태 매핑
+
+| ID | Figma 기준 | 내용 |
+|---|---|---|
+| S-01 | [시작](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-2) | 브랜드, `오늘의 타로`, 감성 영문, 카드 뒷면, 본문, 시작 CTA, 오락용·비저장 안내 |
+| S-02 | [입력 완료](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-7) | 뒤로가기, `01 / 02`, 이름·생년월일·선택 전공, 주제, 개인정보, 활성 뽑기 |
+| S-02a | [입력 전](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8449) | 빈 필드, 주제 미선택, 비활성 뽑기 |
+| S-02b | [날짜 오류](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8522) | 날짜 오류 문구·선, 비활성 뽑기 |
+| S-03 | [결과](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-14) | `02 / 02`, 결과 제목·감성 영문, 카드, 공개 정보 안내, 액션 2행, 개인정보 |
+| S-03a | [저장 완료](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8596) | 결과 + 저장 토스트 |
+| S-03b | [저장 대체](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8837) | 길게 눌러 저장하는 바텀시트 |
+| S-03c | [자동 복사 완료](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8690) | 결과 + 복사 토스트 |
+| S-03d | [수동 복사](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8990) | 직접 선택할 메시지가 있는 바텀시트 |
+| Export | [공유 이미지](https://www.figma.com/design/o7pHCrCLyHdeS3C86j69NA?node-id=2-8784) | 1080 × 1350 PNG 기준 |
+
+시작 비주얼 영역 높이는 344px, 카드 뒷면은 196 × 286px에 -7° 기울기다. 제목은 `오늘의 타로`, 감성 영문은 `The stars whisper to you`, 본문은 `내 정보를 넣고 카드 한 장으로 / 나만의 해석을 받아 봐요`로 역할이 분리된다. 본문 자체를 스크립트 서체로 바꾸지 않는다.
+
+결과 제목은 `오늘, 당신에게 온 카드`, 감성 영문은 `A little light for your day`. 카드 아래에 `저장·공유할 때 닉네임과 별자리가 포함돼요.`를 표시한다. 첫 액션 행은 저장/공유, 둘째는 다시 뽑기/처음으로다.
+
+## 7. 흐름·동작 — 기존 유지
+
+- 타로 시작 → S-02. 입력·실제 날짜·주제가 유효할 때만 뽑기 가능.
+- 메이저 아르카나 22장 중 무작위 한 장, 정방향. 서버·AI 실시간 해석 대신 앱에 미리 넣은 문구를 조합한다.
+- 다시 뽑기 → 입력 정보를 유지한 채 S-02에서 주제 선택부터. 처음으로 → 정보 모두 삭제 후 S-01. 공유 링크를 받은 사람도 S-01부터 시작한다.
+- 이미지 저장 성공 → 토스트. 다운로드 제한 → 이미지 저장 대체 시트.
+- 기기 공유 메뉴 지원 → 이미지와 글 공유; 완료/취소 후 결과 유지. 미지원 → 글 자동 복사; 복사 성공 → 토스트, 복사도 실패 → 직접 선택할 메시지.
+- 카드 플립은 **0.8초**(1초 이내), perspective 1000px, rotateY 180°, easing `cubic-bezier(0.34, 1.56, 0.64, 1)`. 현재 정지 시안에서 새 모션 값은 추출하지 않았다.
 
 ```css
-/* 카드 플립 애니메이션 */
-.flip-card {
-  perspective: 1000px;
-}
+/* 기존 모션 규칙 유지: 현재 화면에 애니메이션이 연결됐다는 의미는 아니다. */
+.flip-card { perspective: 1000px; }
 .flip-card-inner {
   transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-style: preserve-3d;
 }
-.flip-card.flipped .flip-card-inner {
-  transform: rotateY(180deg);
-}
-.flip-card-front, .flip-card-back {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.flip-card-back {
-  transform: rotateY(180deg);
-}
+.flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+.flip-card-front, .flip-card-back { backface-visibility: hidden; }
+.flip-card-back { transform: rotateY(180deg); }
 ```
 
-### 4.3 폼 입력 필드 (Input) — S-02 (F-2)
+## 8. 저장 이미지와 공유 문구
 
-- **디자인**: Pure White 인풋 필드, 8px 코너 라운딩(`rounded-[8px]`), 부드러운 모래빛 테두리(`border-[#d2b68c]`).
-- **포커스 상태**: 딥 인디고 링(`focus:ring-2 focus:ring-[#234386] focus:border-transparent`).
-- **모바일 필수 대응**: iOS 사파리 자동 확대 방지를 위해 글자 크기는 `16px` 이상 유지.
+### 8.1 PNG 출력
 
-### 4.4 개인정보 안내 및 알림 박스 (Privacy Callout) — F-2, F-4
+- **1080 × 1350px, 4:5**. 화면의 327 × 408.75px 결과 카드를 `1080 / 327`배로 비례 확대한다. 글자·간격·모서리도 함께 확대하며 출력 폭만 늘리거나 카드 내용을 재배치하지 않는다.
+- 현재 저장본은 **흰색 카드 바탕**, 얇은 인디고 선, **바깥 그림자 없음**이다. 기존 설명의 크림 바탕·추가 골드/민트 블롭을 저장본에 임의로 추가하지 않는다.
+- 포함: 이름/닉네임, 주제, 카드 삽화·영문명·한글명, 별자리, 최대 3줄 해석, `※ 오락용 타로 해석입니다`, `오늘의 타로 · tarot.app`.
+- 제외: 생년월일 원문, 전공 원문, 입력 폼, 액션 버튼, 개인정보 안내 박스. 전공 기반 해석 문장은 원문 입력값과 구분한다.
+- 4:5는 피드형 세로 이미지다. **9:16 스토리 전체 화면 규격과 동일하지 않다.** 스토리에서도 이미지로 공유할 수 있으나 꽉 찬 9:16 이미지로 표기하지 않는다.
 
-- **스타일**: 부드러운 양피지 샌드 배경(`bg-[#f3eee5]`), 얇은 딥 인디고 테두리(`border border-[#234386]/20`), 라운드 `rounded-[12px]`, 패딩 `p-3.5`.
-- **아이콘**: 🔒 미니멀 인디고 라인 자물쇠.
-- **문구**: "입력한 이름 · 생년월일 · 전공은 해석을 만드는 데만 쓰고 저장하지 않아요. 창을 닫거나 [처음으로]를 누르면 바로 지워져요." (Caption 12px)
+### 8.2 공유 텍스트
 
-### 4.5 토스트 & 모달 (Toast / Modal) — F-5, F-6 상태 처리
+수동 복사 시안에 맞춰 장식 이모지·인용부호 없이 아래 내용을 사용한다. 전공 미입력/분류 불가 시 세 번째 해석 줄은 생략하며 빈 자리 문구를 넣지 않는다.
 
-- **이미지 저장 성공 시**: "이미지를 저장했어요" (딥 인디고 바텀 토스트, 3초 후 페이드아웃).
-- **인앱 브라우저 다운로드 제한 시**: 생성된 1080×1350 이미지를 모달로 띄우고 "이미지를 길게 눌러 저장해 주세요" 안내.
-- **공유 메뉴 미지원 환경**: 클립보드 자동 복사 실행 후 "결과를 복사했어요. 원하는 앱에 붙여 넣어 주세요" 토스트 표출.
-
----
-
-## 5. 화면별 디자인 명세 (S-01 ~ S-03)
-
-```
-[모바일 뷰포트 레이아웃 기준: max-w-[430px] mx-auto min-h-screen bg-[#fbf9f6] text-[#1a1a1a]]
-```
-
-### S-01 시작 화면 (F-1)
-- **헤더**: 미니멀 엠블럼 또는 나침반/달 식물 모티브 라인아트.
-- **중앙 비주얼**: 타로 카드 뒷면 일러스트 (딥 인디고 바탕에 골드 천체 기하학 문양). 카드 주변에 부드러운 꿀빛(`Honey Gold`) 오가닉 블롭 배경 워시.
-- **타이틀**:
-  - `Bebas Neue` 40px: "🔮 오늘의 타로"
-  - `Caveat` 20px: "내 정보를 넣고 카드 한 장으로 나만의 해석을 받아 봐요"
-- **CTA 버튼**: `[타로 시작]` (32px 필, Deep Indigo 배경, 화이트 텍스트, full width).
-- **푸터 안내**: "※ 오락용 타로 · 정보는 저장 안 해요" (12px Caption, Muted).
-
-### S-02 내 정보 & 주제 선택 화면 (F-2)
-- **상단 내비게이션**: `← 뒤로가기` (처음 화면으로 복귀).
-- **헤딩**: "나에 대해 알려 주세요" (22px Semibold Deep Indigo).
-- **입력 폼 영역**:
-  - **이름 (닉네임 OK)**: 10자 제한 인풋, 플레이스홀더 "지민".
-  - **생년월일**: `YYYY . MM . DD` 형태 (실제 유효 날짜 검증, 날짜 피커 지원).
-  - **전공 (선택)**: 플레이스홀더 "경영학과" (인문/사회/경영/자연/공학/예체능 자동 매핑).
-- **주제 선택 (Topic Chips - 6종)**:
-  - 2열 그리드 배치 (`grid grid-cols-3 gap-2.5`)
-  - `[💼 커리어]`, `[💰 재물]`, `[💕 연애]`, `[🌿 건강]`, `[📚 학업]`, `[✨ 종합]`
-  - 미선택 시 화이트 카드 / 선택 시 Deep Indigo 솔리드 배경 + 화이트 텍스트 전환.
-- **보안 배지**: 🔒 개인정보 미저장 원칙 배너 (크림 샌드 배경).
-- **CTA 버튼**: `[카드 한 장 뽑기]` (이름 + 생년월일 + 주제 3가지 충족 시 인디고 활성화, 미충족 시 비활성화 `opacity-40`).
-
-### S-03 맞춤 해석 결과 화면 (F-4 ~ F-7)
-- **중앙 타로 결과 카드 (1080×1350 비율 카드 컨테이너)**:
-  - 상단: `지민님의 타로 · 커리어` (Eyebrow 13px, Deep Indigo)
-  - 중앙: 카드 일러스트 프레임 (예: XIX 태양 카드) + 플립 모션
-  - 명칭: `XIX 태양 · ♌ 사자자리` (18px Bold)
-  - 맞춤 해석 3줄 (총 90자 이내, 15px, 자간 -0.2px, 행간 1.6):
-    - 1줄 (카드×주제): "준비한 것을 드러낼 때예요."
-    - 2줄 (별자리): "사자자리의 자신감이 무기가 돼요."
-    - 3줄 (전공 계열): "경영학도다운 기획력이 빛나요."
-  - 하단 고지: "※ 오락용 타로 해석입니다" (11px, Muted)
-- **액션 버튼 그리드 (4종)**:
-  - 1행: `[ 📥 이미지 저장 ]` (Primary Indigo) + `[ 🔗 결과 공유 ]` (Outline Burnt Orange)
-  - 2행: `[ 🔄 다시 뽑기 ]` (Secondary Sand) + `[ 🏠 처음으로 ]` (Ghost text)
-- **하단 안내**: "🔒 정보는 저장되지 않아요. [처음으로]를 누르면 바로 지워져요."
-
----
-
-## 6. 이미지 저장(1080×1350) 및 공유 메시지 규격
-
-### 6.1 저장 이미지 렌더링 규격 (F-5)
-- **크기**: 1080px × 1350px (PNG, 4:5 인스타그램 피드/스토리 비율).
-- **캔버스 바탕**: `#fbf9f6` 크림 페이퍼 질감 + 상하단 유기적 골드/민트 블롭 오버레이.
-- **포함 요소**:
-  - 사용자 이름 & 선택 주제 (예: "지민님의 커리어 타로")
-  - 메이저 아르카나 카드 일러스트 & 명칭 (예: "XIX THE SUN 태양")
-  - 생년월일 기반 별자리 기호 및 명칭 (예: "♌ 사자자리")
-  - 3줄 맞춤 해석 텍스트
-  - "※ 오락용 타로 해석입니다"
-  - 워터마크 브랜딩: "오늘의 타로 · tarot.app"
-  - *(주의: 개인정보 보호를 위해 생년월일 원문 및 전공 원문은 절대 이미지에 포함하지 않음)*
-
-### 6.2 결과 공유 메시지 텍스트 규격 (F-6)
 ```text
-🔮 {이름}님의 타로 · {주제}
-{카드 이름} · {별자리}
+{이름}님의 타로 · {주제}
+{카드 한글 이름} · {별자리}
 
-"{해석 1줄}"
-"{해석 2줄}"
-"{해석 3줄}"
+{해석 1줄}
+{해석 2줄}
+{해석 3줄 — 있을 때만}
 
 ※ 오락용 타로 해석입니다
-나도 한 장 뽑기 → https://tarot.app
+나도 한 장 뽑기 → {시작 화면 URL}
 ```
 
----
+`https://tarot.app`과 워터마크 도메인은 현재 시안·기존 가이드의 예시를 유지한 것이며, 실제 서비스 도메인 소유·배포 여부를 보증하지 않는다. 운영 배포 시 확정된 시작 URL과 서비스 워터마크로 함께 교체한다. 링크에 이름·생년월일·전공·결과를 쿼리나 경로로 넣지 않는다.
 
-## 7. Do's and Don'ts
+## 9. 구현용 토큰 예시 — Tailwind CSS v4
 
-### ✅ Do
-- **딥 인디고(`#234386`)를 유일한 주력 쿨톤으로 사용**: 헤드라인, 링크, 활성 버튼을 딥 인디고로 고정하여 시각적 질서와 고급스러움을 유지합니다.
-- **32px 필 버튼과 8~12px 카드의 대비 유지**: 둥근 알약형 버튼과 정갈한 사각 카드의 비례 대비가 손에 쥐는 수첩 같은 촉각적 감성을 줍니다.
-- **3줄 해석의 엄격한 길이 제한 준수**: 모바일 한 화면에서 스크롤 없이 카드와 해석이 다 보이도록 90자 이내로 간결하게 배치합니다.
-- **개인정보 즉시 폐기 안내 상시 표시**: 사용자가 불안해하지 않도록 입력창 아래와 결과창 아래에 자물쇠 아이콘과 함께 비저장 원칙을 명시합니다.
-- **천체·식물 라인아트를 프레임 밖으로 살짝 걸치기**: 카드 테두리나 화면 모서리에 라인아트를 자연스럽게 배치해 손으로 그린 수첩 느낌을 연출합니다.
-
-### ❌ Don't
-- **보라색/어두운 검정 벨벳톤의 오컬트 테마 사용 금지**: 대중적이고 산뜻한 캐주얼 모바일 서비스이므로 무거운 점술 앱 느낌을 배제합니다.
-- **생년월일(YYYY.MM.DD) 원문을 결과 이미지나 공유 메시지에 노출 금지**: 프라이버시 보호를 위해 오직 '별자리'로만 변환하여 표기합니다.
-- **골드(`#ffc400`)나 오렌지(`#ed7328`)로 전체 버튼 면을 채우지 않기**: 따뜻한 컬러들은 블롭 그래픽과 아웃라인 보조선으로만 써야 인디고의 권위와 가독성이 유지됩니다.
-- **단정적인 예언 표현 금지**: "취업에 합격합니다", "부자가 됩니다" 대신 "기획력이 빛을 발할 때예요", "지출 우선순위를 점검해 보세요" 등 관점을 열어주는 표현을 씁니다.
-
----
-
-## 8. 빠른 구현 코드 (Quick Start)
-
-### Tailwind CSS v4 `@theme` (`app.css`)
+다음은 실측값·기존 유지 규칙·구현용 의미 매핑을 함께 담은 예시다. 현재 Figma에 이 이름의 변수가 등록되어 있다는 뜻이 아니다. `primary`, `background`, `input`, `accent` 등의 별칭은 구현용 매핑이며 등록된 Figma 토큰의 증거가 아니다. shadcn/ui를 쓰면 이 의미 토큰에 연결하며, 기본 크기·기본 폰트를 그대로 두지 않는다.
 
 ```css
 @import "tailwindcss";
 
 @theme {
-  /* Colors */
   --color-deep-indigo: #234386;
   --color-honey-gold: #ffc400;
   --color-burnt-orange: #ed7328;
-  --color-sky-blue: #6aa8dc;
   --color-warm-sand: #d2b68c;
   --color-mint-sage: #a2d3a6;
   --color-ink-black: #1a1a1a;
   --color-pure-white: #ffffff;
   --color-cream-paper: #fbf9f6;
-  --color-soft-shadow: rgba(0, 0, 0, 0.08);
-
-  /* Semantic Theme Mappings for shadcn */
   --color-background: #fbf9f6;
   --color-foreground: #1a1a1a;
   --color-primary: #234386;
   --color-primary-foreground: #ffffff;
   --color-secondary: #f0ebe1;
   --color-secondary-foreground: #234386;
-  --color-muted: #e8e2d5;
   --color-muted-foreground: #666666;
+  --color-placeholder: #777777;
+  --color-privacy-surface: #f3eee5;
+  --color-border: #d2b68c;
+  --color-input: #d2b68c;
+  --color-ring: #234386;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
   --color-accent: #ffc400;
   --color-accent-foreground: #234386;
   --color-destructive: #d9383a;
   --color-destructive-foreground: #ffffff;
-  --color-border: #d2b68c;
-  --color-input: #e2dbce;
-  --color-ring: #234386;
-  --color-card: #ffffff;
-  --color-card-foreground: #1a1a1a;
+  --color-error-text: #bd3031;
+  --color-overlay: rgba(24, 38, 74, 0.32);
 
-  /* Fonts */
-  --font-display: "Bebas Neue", "Oswald", sans-serif;
-  --font-script: "Caveat", cursive;
-  --font-sans: "Pretendard", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-
-  /* Radii */
-  --radius-card: 12px;
-  --radius-input: 8px;
-  --radius-button: 32px;
-  --radius-badge: 16px;
-
-  /* Shadows */
-  --shadow-tarot-card: -8px 12px 32px rgba(35, 67, 134, 0.09);
+  /* 기존 확장 토큰 유지 — 현재 주요 화면의 실측 사용값과 구분 */
+  --color-sky-blue: #6aa8dc;
+  --color-muted: #e8e2d5;
+  --color-soft-shadow: rgba(0, 0, 0, 0.08);
   --shadow-blob: 0 16px 32px rgba(255, 196, 0, 0.15);
+
+  /* 첫 서체는 실측, 대체 서체는 기존 유지 규칙 */
+  --font-sans: "Noto Sans KR", "Pretendard", "Inter", system-ui, sans-serif;
+  --font-display: "Bebas Neue", "Oswald", sans-serif;
+  --font-script: "Caveat", "Nanum Pen Script", "Dancing Script", cursive;
+  --font-brand: "Inter", system-ui, sans-serif;
+  --radius-input: 8px;
+  --radius-card: 12px;
+  --radius-badge: 16px;
+  --radius-topic: 20px;
+  --radius-sheet: 24px;
+  --radius-button: 32px;
+  --shadow-tarot-card: -8px 12px 32px rgba(35, 67, 134, 0.09);
+  --shadow-tarot-back: -6px 12px 22px rgba(35, 67, 134, 0.16);
 }
 
-/* Base Body Styles */
+:root {
+  --page-inset: 24px;
+  --field-gap: 16px;
+  --field-label-gap: 6px;
+  --topic-column-gap: 8px;
+  --topic-row-gap: 10px;
+  --action-column-gap: 9px;
+}
+
 body {
-  background-color: var(--color-cream-paper);
-  color: var(--color-ink-black);
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+.taro-page {
+  /* 최대 폭 430px는 기존 유지, 유동 최소 높이는 웹 구현 대응 */
+  width: 100%; max-width: 430px; min-height: 100dvh;
+  margin-inline: auto; padding-block: 24px;
+}
+.taro-region { padding-inline: var(--page-inset); }
+.taro-reading { font: 400 15px/24px var(--font-sans); letter-spacing: -0.2px; }
+.taro-topics {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--topic-row-gap) var(--topic-column-gap);
+}
+.taro-input {
+  box-sizing: border-box; width: 100%; height: 48px; padding-inline: 14px;
+  border: 1px solid var(--color-input); border-radius: 8px;
+  background: #fff; color: var(--color-foreground);
+  font: 400 16px/1.5 var(--font-sans);
+}
+.taro-input::placeholder { color: var(--color-placeholder); }
+.taro-input[aria-invalid="true"] { border: 1.5px solid var(--color-destructive); }
+/* 기존 포커스 규칙 유지 */
+.taro-input:focus-visible {
+  outline: 2px solid var(--color-ring); border-color: transparent;
+}
+.taro-result-card {
+  box-sizing: border-box; width: 100%; aspect-ratio: 4 / 5;
+  padding: 16px 16px 14px; border-radius: 12px;
+  border: 1px solid rgba(35, 67, 134, 0.13);
+  background: #fff; box-shadow: var(--shadow-tarot-card);
+}
+.taro-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 32px; letter-spacing: 0;
+  /* 아래 전환·누름·비활성 입력 차단은 기존 유지 규칙 */
+  transition: background-color 200ms, transform 200ms;
+}
+.taro-button:active { transform: scale(0.95); }
+.taro-button:disabled { opacity: 0.4; pointer-events: none; }
+/* 크기와 글꼴은 Button 표에 따라 용도별로 적용한다. */
 ```
+
+필수 서체의 웹 로딩·라이선스를 배포 환경에서 확인한다. 위 예시는 토큰 연결용이며 완성된 UI 구현이 아니다. 4:5 카드에서 콘텐츠가 넘치면 해석 길이와 서체 로딩을 먼저 확인하고, 작은 글자로 억지 축소하거나 정보를 잘라내지 않는다.
+
+## 10. 인계 체크리스트
+
+- [ ] 375px에서 좌우 24px, 3열 주제, 용도별 버튼 높이와 Noto Sans KR 적용을 확인한다.
+- [ ] 빈 입력·잘못된 실제 날짜·선택 전 주제에서 뽑기가 비활성인지 확인한다.
+- [ ] 해석이 3줄·90자 이내이며 전공 미입력/분류 불가 시 3번째 줄이 없는지 확인한다.
+- [ ] 저장/공유에 생년월일·전공 원문이 없고 닉네임·별자리 포함 안내가 보이는지 확인한다.
+- [ ] PNG 1080 × 1350, 흰색 4:5 카드, 그림자 제외, 서비스명·오락용 고지를 확인한다.
+- [ ] 저장 제한 → 길게 눌러 저장, 공유 미지원 → 자동 복사, 복사 실패 → 수동 선택을 확인한다.
+- [ ] 처음으로·새로 고침·창 닫기 후 개인정보가 남지 않고 공유 링크가 시작 화면으로 가는지 확인한다.
+- [ ] 서체 대체·텍스트 확대·짧은 화면·키보드·안전 영역에서 콘텐츠가 잘리지 않는지 확인한다.
+- [ ] 작은 보조 글자, 색 대비, 키보드 포커스, 아이콘 접근성 이름과 터치 영역을 별도로 검토한다. 정지 시안만으로 접근성을 통과한 것으로 보지 않는다.
+- [ ] 전체 22장 카드 자산과 사용 권한, 실제 서비스 URL/워터마크를 출시 전에 확정한다. 현재 팩에서 확인되는 대표 그림은 카드 뒷면과 태양이며 22장 전체 자산이 준비된 것으로 간주하지 않는다.
+
+이 갱신은 디자인 가이드만 변경한다. Figma의 컴포넌트화·변수 등록, 나머지 카드 삽화 제작, 애플리케이션 구현 및 PRD의 미정 항목 확정을 대신하지 않는다.
